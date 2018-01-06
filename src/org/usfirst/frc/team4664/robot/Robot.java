@@ -8,13 +8,13 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-public class Robot extends SampleRobot implements Constants
+public class Robot extends SampleRobot implements Constants2018
 {
 	RobotDrive driveSystem;
-	Victor collectMotor;
-	Victor shootMotor;
-	Victor hopperMotor;
-	Victor climbMotor;
+	Victor motorJuan;
+	Victor motor2;
+	Victor motor3;
+	Victor motor4;
 	Joystick stick;
 	Joystick gamepad;
 	AnalogGyro gyro;
@@ -23,10 +23,10 @@ public class Robot extends SampleRobot implements Constants
 		//Motors
 		driveSystem = new RobotDrive(LSMOTOR, RSMOTOR);
 		driveSystem.setExpiration(0.1);
-		hopperMotor=new Victor(HOPPERPORT);
-		collectMotor =new Victor(COLLECTMPORT);
-		shootMotor=new Victor(SHOOTMPORT);
-		climbMotor=new Victor(CLIMBMPORT);
+		motor3=new Victor(MOTOR3PORT);
+		motorJuan =new Victor(MOTOR1PORT);
+		motor2=new Victor(MOTOR2PORT);
+		motor4=new Victor(MOTOR4PORT);
 		//Input
 		stick = new Joystick(gamepadPort);
 		gamepad = new Joystick(joystickPort);

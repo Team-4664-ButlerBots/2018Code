@@ -1,14 +1,14 @@
 package org.usfirst.frc.team4664.robot;
 
-public interface Constants{
+public interface Constants2018{
 	final int AUTONOMOUSCHOICE= 1;
 	final int LSMOTOR	    = 0;
     final int RSMOTOR	    = 1;
     
-    final int COLLECTMPORT= 5;//correct
-    final int SHOOTMPORT =  3;//correct
-    final int HOPPERPORT =  4;//correct
-    final int CLIMBMPORT =  2;//correct
+    final int MOTOR1PORT = 5;//correct
+    final int MOTOR2PORT =  3;//correct
+    final int MOTOR3PORT =  4;//correct
+    final int MOTOR4PORT =  2;//correct
     
 //joystick 2 buttons
     final int HOPPERB = 11;
