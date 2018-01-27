@@ -1,6 +1,8 @@
 package org.usfirst.frc.team4664.robot;
 
-public interface Constants2018{
+
+//TODO: rewrite all variables and remove unneeded ones.
+public interface Constants{
 	final int AUTONOMOUSCHOICE= 1;
 	final int LSMOTOR	    = 0;
     final int RSMOTOR	    = 1;

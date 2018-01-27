@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry exported="true" kind="lib" path="/Robot_2017_Code-NewRobotCode (2)/Robot_2017_Code-NewRobotCode/jars/WPILib.jar"/>
-	<classpathentry kind="lib" path="/Robot_2017_Code-NewRobotCode (2)/Robot_2017_Code-NewRobotCode/jars/cscore.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Driver/wpilib/java/current/lib/cscore.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Driver/wpilib/java/current/lib/ntcore.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Driver/wpilib/java/current/lib/opencv.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Driver/wpilib/java/current/lib/WPILib.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Driver/wpilib/java/current/lib/wpiutil.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

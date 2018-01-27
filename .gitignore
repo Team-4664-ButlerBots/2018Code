@@ -19,3 +19,4 @@
 *.rar
 *.classpath
 *.project
+/bin/
