@@ -1,16 +1,18 @@
 package org.usfirst.frc.team4664.robot;
 
+
+//TODO: rewrite all variables and remove unneeded ones.
 public interface Constants{
 	final int AUTONOMOUSCHOICE= 1;
-	final int LSMOTOR	    = 0;
-    final int RSMOTOR	    = 1;
+	final int LSMOTOR	    = 0;//Port for left side motor controller
+    final int RSMOTOR	    = 1;//Port for right side motor controller
     
-    final int COLLECTMPORT= 5;//correct
-    final int SHOOTMPORT =  3;//correct
-    final int HOPPERPORT =  4;//correct
-    final int CLIMBMPORT =  2;//correct
+    final int MOTOR1PORT = 5;//correct
+    final int MOTOR2PORT =  3;//correct
+    final int MOTOR3PORT =  4;//correct
+    final int MOTOR4PORT =  2;//correct
     
-//joystick 2 buttons
+//joy stick 2 buttons
     final int HOPPERB = 11;
     final int COLLECTINB = 4;
     final int COLLECTOUTB = 5;
@@ -29,6 +31,9 @@ public interface Constants{
     final int gamepadPort	= 1;
     final int joystickPort  = 0;
 //Sensor Variables
+    final int ARMCLOSESWITCHPORT = 0;
+    final int ARMOPENEDSWITCHPORT = 1;
+    
     final int rangeFinder   = 0;
     final int gyroSense   = 1;
 //Scale Factors
