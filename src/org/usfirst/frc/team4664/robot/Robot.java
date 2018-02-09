@@ -106,7 +106,7 @@ public class Robot extends TimedRobot implements Constants {
 			return 0.0;
 		if(AxisInput>deadband)
 			return (AxisInput - deadband) / (1.0 - deadband);
-		// else
+		else
 			return (AxisInput + deadband) / (1.0 - deadband);
 	}
 	
@@ -117,11 +117,17 @@ public class Robot extends TimedRobot implements Constants {
 						 return value;
 	}
 	
-	public void ArmCLose() {
-		
+	//takes a specific motor controller (either victor or spark) and 
+	//then a limit switch or other digital device, and runs the motor for speed.
+	public void runMotor(Spark motor, DigitalInput limitSwitch, double speed){
+		if(DigitalInpit.get()){
+			motor.setSpeed(speed);
+		}
 	}
-	
-	public void ArmOpen() {
-		
+
+	public void runMotor(Victor motor, DigitalInput limitSwitch, double speed){
+		if(!DigitalInput.get()){
+			motor.setSpeed(speed);
+		}
 	}
 }
