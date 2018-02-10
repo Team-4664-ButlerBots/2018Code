@@ -7,10 +7,10 @@ public interface Constants{
 	final int LSMOTOR	    = 0;//Port for left side motor controller
     final int RSMOTOR	    = 1;//Port for right side motor controller
     
-    final int MOTOR1PORT = 5;//correct
-    final int MOTOR2PORT =  3;//correct
-    final int MOTOR3PORT =  4;//correct
-    final int MOTOR4PORT =  2;//correct
+    final int MOTOR1PORT = 3; //correct
+    final int MOTOR2PORT = 4; //correct
+    final int MOTOR3PORT = 5; //correct
+    final int MOTOR4PORT = 6; //correct
     
 //joy stick 2 buttons
     final int HOPPERB = 11;
