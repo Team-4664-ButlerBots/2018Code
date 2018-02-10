@@ -73,8 +73,8 @@ public class Robot extends TimedRobot implements Constants {
 		//FIXME: error "output not updated enough."
 		switch (autonomousChosen) {
 			case DRIVETEST:
-				leftSideGroup.set(.3);
-				rightSideGroup.set(.3);
+				//
+				driveTrain.tankDrive(.3,.3);
 				break;
 			case BENCHTOPTEST:
 			default:
