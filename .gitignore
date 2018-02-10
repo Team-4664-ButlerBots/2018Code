@@ -20,6 +20,3 @@
 *.classpath
 *.project
 /bin/
-
-*.xml
-*.properties
