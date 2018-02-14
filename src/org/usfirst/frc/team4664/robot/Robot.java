@@ -82,7 +82,7 @@ public class Robot extends TimedRobot implements Constants {
 			case BENCHTOPTEST:
 				break;
 			case LIMIT:
-				runMotor(armLiftMotor, ArmClosedSwitch, .05);
+				toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, .05);
 				break;
 				
 			default:
@@ -91,18 +91,19 @@ public class Robot extends TimedRobot implements Constants {
 		}
 	}
 
+
 	//during tele-operated
 	@Override
 	public void teleopPeriodic() {
-		while (isOperatorControl() && isEnabled()) 
-		{	
+		//while (isOperatorControl() && isEnabled()) 
+		//{	
 			//Log();
 			//the dead band function receives the inputs game pad axis and dead band constant
 			//it takes these and makes sure no input is given when under the dead band constant.
-			//driveTrain.tankDrive(deadBand(gamepad.getRawAxis(3),DRIVEDB)*maxSpeedDrive,deadBand(gamepad.getY(),DRIVEDB)*maxSpeedDrive );
-			runMotor(armLiftMotor, ArmClosedSwitch, .4);
+			driveTrain.tankDrive(deadBand(gamepad.getRawAxis(3),DRIVEDB)*maxSpeedDrive,deadBand(gamepad.getY(),DRIVEDB)*maxSpeedDrive );
+			toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, MotorSpeed);
 			SmartDashboard.updateValues();
-		}
+		//}
 	}
 
 	//during test
@@ -145,17 +146,19 @@ public class Robot extends TimedRobot implements Constants {
 			motor.setSpeed(0);
 	}
 	
+	
+	double MotorSpeed = 1;//keeps track of test motor spee0.1
 	public static boolean polarity = false;
 	public boolean pressed = false;
-	public void runMotor(Talon motor, DigitalInput limitSwitch, double speed) {
-		
+	public void toggleMotorPolarity(Talon motor, DigitalInput limitSwitch, double speed) {
 		if(!limitSwitch.get() && !pressed) {
-			speed *= -1;
+			MotorSpeed *= -1;
+			pressed = true;
 		}else if(limitSwitch.get()) {
-			pressed = !pressed;
-			
+			pressed = false;
 		}
-		motor.set(speed);
+		motor.set(MotorSpeed);
+		
 	}
 	
 	//inverts didgital input boolean
