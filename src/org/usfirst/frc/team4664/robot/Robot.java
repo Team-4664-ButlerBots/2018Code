@@ -1,125 +1,123 @@
 package org.usfirst.frc.team4664.robot;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Robot extends TimedRobot implements Constants {
-	private static final String BENCHTOPTEST = "Benchtop Test";
-	private static final String DRIVETEST = "This test case is meant to drive the robot. NOTE: can be set on ground for this one.";
-	private static final String LIMIT = "WEW.";
-	private String autonomousChosen;
-	private SendableChooser<String> autoMenu = new SendableChooser<>();
-	
-//Sensors
-//LimitSwitches
-	private DigitalInput ArmClosedSwitch;
-	private DigitalInput ArmOpenedSwitch;
+public class Robot extends TimedRobot implements Constants {	
+//Motor Controller
+	private Spark cage = new Spark(CAGEPORT);
+	private Spark arm = new Spark(ARMPORT);
+	private Spark claw = new Spark(CLAWPORT);
 
-	
-//Motor Controller setup
-	
-	private Spark liftMotor = new Spark(MOTOR1PORT);
-	private Talon armLiftMotor = new Talon(MOTOR2PORT);
-	private Victor wew1 = new Victor(MOTOR3PORT);
-	private Victor wew2 = new Victor(MOTOR4PORT);
-	
-//robot drive train setup stuff
-	private Spark leftSideMotor = new Spark(LSMOTOR);
-	private Spark rightSideMotor = new Spark(RSMOTOR);
+//Robot Drive Train
+	private Victor leftSideMotor = new Victor(LSMOTOR);
+	private Victor rightSideMotor = new Victor(RSMOTOR);
 
 	private SpeedControllerGroup leftSideGroup = new SpeedControllerGroup(leftSideMotor);
 	private SpeedControllerGroup rightSideGroup = new SpeedControllerGroup(rightSideMotor);
 	
 	private DifferentialDrive driveTrain = new DifferentialDrive(leftSideGroup, rightSideGroup);
 	
-//controller
+//Controllers
 	private Joystick gamepad = new Joystick(0);
-
+	private Joystick joystick = new Joystick(1);
+	
+//Sensors
+	private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+	private ToggleGyro toggle = new ToggleGyro(gyro); // Use for DriveStraight
+	
 	//runs on startup
 	@Override
 	public void robotInit() {
-		//Smart Dashboard stuff
-		autoMenu.addDefault("benchtopTestCase", BENCHTOPTEST);
-		autoMenu.addObject("standardDriveCase", DRIVETEST);
-		autoMenu.addObject("limitTest", LIMIT);
-
 		
 		//camera Stuff
-		CameraServer.getInstance().startAutomaticCapture();
+		CameraServer.getInstance().startAutomaticCapture(0);
+		CameraServer.getInstance().startAutomaticCapture(1);
 		
-		//Sensor stuff
-		ArmClosedSwitch = new DigitalInput(ARMCLOSESWITCHPORT);
-		ArmOpenedSwitch = new DigitalInput(ARMOPENEDSWITCHPORT);
-
+		Log();
+		
+		gyro.calibrate();
 	}
 
 	//chooses following code with the chooser object, you can declare additional functions by editing chooser.
 	@Override
 	public void autonomousInit() {
-		autonomousChosen = autoMenu.getSelected();
-		System.out.println("Autonomous selected: " + autonomousChosen);
 	}
 
 	//during auto
 	@Override
 	public void autonomousPeriodic() {
-		//FIXME: error "output not updated enough."
-		SmartDashboard.updateValues();
-		switch (autonomousChosen) {
-			case DRIVETEST:
-				//
-				driveTrain.tankDrive(.3,.3);
-				break;
-			case BENCHTOPTEST:
-				break;
-			case LIMIT:
-				toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, .05);
-				break;
-				
-			default:
-				//TODO: actually write a test case
-				break;
-		}
 	}
 
 
+	
 	//during tele-operated
 	@Override
 	public void teleopPeriodic() {
-		//while (isOperatorControl() && isEnabled()) 
-		//{	
-			//Log();
-			//the dead band function receives the inputs game pad axis and dead band constant
-			//it takes these and makes sure no input is given when under the dead band constant.
-			driveTrain.tankDrive(deadBand(gamepad.getRawAxis(3),DRIVEDB)*maxSpeedDrive,deadBand(gamepad.getY(),DRIVEDB)*maxSpeedDrive );
-			toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, MotorSpeed);
-			SmartDashboard.updateValues();
-		//}
+		//drive code
+		if (toggle.toggle(gamepad.getRawButton(5))) // If gamepad left bumper, drive straight; Need toggle for Drive straight, passes boolean
+			DriveStraight();
+		else // Normal Drive With Gamepad
+			DriveWithController();
+		
+		
+		//cage
+		cage.set(joystick.getY());
+		//cage.set(deadband(jsDeadband(joystick.getY()), CLAWDB));
+		
+		//arm
+		if(joystick.getRawButton(6)) // pressing upper left button on base (6) pulls arm in. if left hand change to 11.
+			arm.set(ARMSPEED_UP);
+		else if(joystick.getRawButton(7)) // pressing lower left button on base (7) pushes arm out. if left hand change to 10.
+			arm.set(ARMSPEED_DOWN);
+		else							  // stops arm
+			arm.set(0);
+		
+		
+		//claw
+		if(joystick.getRawButton(8))
+			claw.set(CLAWSPEED);
+		else
+			claw.set(0);
+				
+		//pushes all the new values to smart dashboard
+		UpdateLog();
+		
 	}
 
 	//during test
 	@Override
 	public void testPeriodic() {
+		//toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, MotorSpeed);
+	}
+	
+	public double jsDeadband(double js) {
+		js = Limit(js, -1.0, 1.0);
+		if(Math.abs(js) <= JOYDB) 
+			return 0.0;
+		if(js > JOYDB)
+			return (js - JOYDB) / (1.0 - JOYDB);
+		else
+			return (js + JOYDB) / (1.0 - JOYDB);
 	}
 	
 	
-	public double deadBand(double AxisInput,double deadband){
-		AxisInput=Limit(AxisInput,-1.0,1.0); 
-		if(Math.abs(AxisInput)<=deadband) 
+	public double deadband(double input, double motorDeadband){
+		input = Limit(input, -1.0, 1.0); 
+		if(input == 0.0) 
 			return 0.0;
-		if(AxisInput>deadband)
-			return (AxisInput - deadband) / (1.0 - deadband);
+		else if(input > 0)
+			return (1 - motorDeadband) * input + motorDeadband;
 		else
-			return (AxisInput + deadband) / (1.0 - deadband);
+			return (1 - motorDeadband) * input - motorDeadband;
 	}
 	
 	//Limits a variable to to a given range
@@ -129,44 +127,31 @@ public class Robot extends TimedRobot implements Constants {
 						 return value;
 	}
 	
-	//takes a specific motor controller (either victor or spark) and 
-	//then a limit switch or other digital device, and runs the motor for speed.
-	public void runMotor(Spark motor, DigitalInput limitSwitch, double speed){
-		if(!returnBool(limitSwitch))
-			motor.setSpeed(speed);
-		else
-			motor.setSpeed(speed);
+	//DRIVE TRAIN STUFF
+	public void DriveWithController() {
+		driveTrain.tankDrive(deadband(jsDeadband(gamepad.getRawAxis(3)),DRIVEDB)*maxSpeedDrive,
+				deadband(jsDeadband(gamepad.getY()),DRIVEDB)*maxSpeedDrive);
 	}
+	
+	public void DriveStraight() {
+		double error = gyro.getAngle() - toggle.getAngle(); // set error to differance between robot angle and starting angle
+		// while toggled keep starting angle
+		driveTrain.arcadeDrive( 1, error*KP);
+	}
+	
+	public void DriveStraight(double speed) {
+		double error = gyro.getAngle() - toggle.getAngle();
+		driveTrain.arcadeDrive(speed, error*KP);
+	}
+	
+	////INTERNAL STUFF BELOW
 
-	//runs the motor oif a limitswitch is not pressed
-	public void runMotor(Victor motor, DigitalInput limitSwitch, double speed){
-		if(!returnBool(limitSwitch))
-			motor.setSpeed(speed);
-		else
-			motor.setSpeed(0);
-	}
-	
-	
-	double MotorSpeed = 1;//keeps track of test motor spee0.1
-	public static boolean polarity = false;
-	public boolean pressed = false;
-	public void toggleMotorPolarity(Talon motor, DigitalInput limitSwitch, double speed) {
-		if(!limitSwitch.get() && !pressed) {
-			MotorSpeed *= -1;
-			pressed = true;
-		}else if(limitSwitch.get()) {
-			pressed = false;
-		}
-		motor.set(MotorSpeed);
-		
-	}
-	
-	//inverts didgital input boolean
+	//inverts digital input boolean
 	public boolean returnBool(DigitalInput input) {
 		return !input.get();
 	}
 	
-	
+	//smart dashboard outputs
 	public void OutputBoolean(DigitalInput input, String name) {
 		SmartDashboard.putBoolean(name, returnBool(input));
 	}
@@ -176,10 +161,17 @@ public class Robot extends TimedRobot implements Constants {
 	}
 	
 	public void Log() {
-		OutputBoolean(ArmClosedSwitch, "WEW");
-		OutputBoolean(ArmOpenedSwitch, "WEW2");
-		SmartDashboard.putData("Autonomous Choices", autoMenu);
+		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+		SmartDashboard.putNumber("Left Motor", leftSideMotor.get());
+		SmartDashboard.putNumber("Right Motor", rightSideMotor.get());
+		SmartDashboard.putNumber("Cage Motor", cage.get());
+		SmartDashboard.putNumber("Arm Motor", arm.get());
+		SmartDashboard.putNumber("Claw Motor", claw.get());
 		SmartDashboard.updateValues();
-
 	}
+	
+	public void UpdateLog() {
+		SmartDashboard.updateValues();
+	}
+	
 }
