@@ -1,39 +1,37 @@
 package org.usfirst.frc.team4664.robot;
 
-
-//TODO: rewrite all variables and remove unneeded ones.
 public interface Constants{
-	final int AUTONOMOUSCHOICE= 1;
-	final int LSMOTOR	    = 0;
-    final int RSMOTOR	    = 1;
-    
-    final int MOTOR1PORT = 5;//correct
-    final int MOTOR2PORT =  3;//correct
-    final int MOTOR3PORT =  4;//correct
-    final int MOTOR4PORT =  2;//correct
-    
-//joystick 2 buttons
-    final int HOPPERB = 11;
-    final int COLLECTINB = 4;
-    final int COLLECTOUTB = 5;
-    final int COLLECTSTOPB = 3;
-    final int SHOOTB = 1; // Uses method .getTrigger()
-//speed variables
-    final double ARMSPEEDVAL   = 0.25;
-    final double WINCHOUT      = 1.0;
-    final double WINCHIN       = -.7;
-    final double LATTICEUP     = 0.8;
-    final double LATTICEDOWN   = -.5;
-//dead band variables
-    final double DRIVEDB    = -0.2;
-    final double CLIMBDB = 0.3;
-//Laptop ports
+//Motor Ports
+	final int LSMOTOR	= 4; //Port for left side motor controller
+    final int RSMOTOR	= 5; //Port for right side motor controller
+    final int CAGEPORT 	= 0;
+    final int ARMPORT 	= 1;
+    final int CLAWPORT 	= 2; 
+//Laptop Ports
     final int gamepadPort	= 1;
     final int joystickPort  = 0;
-//Sensor Variables
-    final int rangeFinder   = 0;
-    final int gyroSense   = 1;
-//Scale Factors
+    
+//Sensor Ports
+    final int ARMCLOSESWITCHPORT	= 0;
+    final int ARMOPENEDSWITCHPORT 	= 1;
+    final int LIFTUPSWITCHPORT 		= 2;
+    final int LIFTDOWNSWITCHPORT 	= 3;
+    
+//Speed Variables: Button Press Speeds
+    final double ARMSPEED_UP   = 0.5;
+    final double ARMSPEED_DOWN = -0.5;
+    final double CLAWSPEED     = 0.5;
+    
+//Scale Factors: Joystick 
     final double maxSpeedDrive   = 1.0;//negative to flip direction
-
+    
+//Deadband Variables: For Joystick
+    final double JOYDB 		= 0.05;
+    final double DRIVEDB    = 0.2;
+    final double TURNDB		= 0.2;
+    final double CLAWDB 	= 0.3;
+    
+    
+//Tunings, Gyro/Drive
+    final double KP = 0.15;
 }
