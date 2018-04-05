@@ -13,10 +13,15 @@ public class ToggleGyro {
 		this.gyro = gyro;
 	}
 	
+	public void UpdateStartingAngle() {
+		startingAngle = gyro.getAngle();
+	}
+	
 	public double getAngle() {
 		return startingAngle;
 	}
 
+	
 	public boolean toggle(boolean rawButton) {
 		// Passes through boolean value, first time get angle
 		// while toggled keep starting angle

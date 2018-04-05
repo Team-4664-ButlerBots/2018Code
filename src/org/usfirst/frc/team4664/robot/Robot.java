@@ -7,159 +7,194 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Robot extends TimedRobot implements Constants {	
-//Motor Controller
+public class Robot extends TimedRobot implements Constants {
+	// Motor Controller
 	private Spark cage = new Spark(CAGEPORT);
 	private Spark arm = new Spark(ARMPORT);
 	private Spark claw = new Spark(CLAWPORT);
+	private Spark Climb = new Spark(CLIMBPORT);
 
-//Robot Drive Train
+	// Robot Drive Train
 	private Victor leftSideMotor = new Victor(LSMOTOR);
 	private Victor rightSideMotor = new Victor(RSMOTOR);
 
 	private SpeedControllerGroup leftSideGroup = new SpeedControllerGroup(leftSideMotor);
 	private SpeedControllerGroup rightSideGroup = new SpeedControllerGroup(rightSideMotor);
-	
+
 	private DifferentialDrive driveTrain = new DifferentialDrive(leftSideGroup, rightSideGroup);
-	
-//Controllers
+
+	// Controllers
 	private Joystick gamepad = new Joystick(0);
 	private Joystick joystick = new Joystick(1);
-	
-//Sensors
+
+	// Sensors
 	private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 	private ToggleGyro toggle = new ToggleGyro(gyro); // Use for DriveStraight
-	
-	//runs on startup
+	public double initTime = 0;
+
+	// runs on startup
 	@Override
 	public void robotInit() {
-		
-		//camera Stuff
+
+		// camera Stuff
 		CameraServer.getInstance().startAutomaticCapture(0);
 		CameraServer.getInstance().startAutomaticCapture(1);
-		
+
 		Log();
-		
+
 		gyro.calibrate();
 	}
 
-	//chooses following code with the chooser object, you can declare additional functions by editing chooser.
+	// chooses following code with the chooser object, you can declare additional
+	// functions by editing chooser.
 	@Override
 	public void autonomousInit() {
+		initTime = Timer.getFPGATimestamp();
+		toggle.UpdateStartingAngle();
 	}
 
-	//during auto
+	// during auto
 	@Override
 	public void autonomousPeriodic() {
+		if((Timer.getFPGATimestamp()-initTime)<=8.0)
+			driveTrain.arcadeDrive(-0.5, 0);
+		else
+			driveTrain.arcadeDrive(0.0, 0);
 	}
 
-
-	
-	//during tele-operated
+	// during tele-operated
 	@Override
 	public void teleopPeriodic() {
 		//drive code
 		if (toggle.toggle(gamepad.getRawButton(5))) // If gamepad left bumper, drive straight; Need toggle for Drive straight, passes boolean
-			DriveStraight();
+			DriveStraight(-1);
 		else // Normal Drive With Gamepad
 			DriveWithController();
 		
 		
 		//cage
-		cage.set(joystick.getY());
+		cage.set(Limit(-joystick.getY(), -1, 0.5));
 		//cage.set(deadband(jsDeadband(joystick.getY()), CLAWDB));
 		
 		//arm
-		if(joystick.getRawButton(6)) // pressing upper left button on base (6) pulls arm in. if left hand change to 11.
+		if(joystick.getRawButton(3)) // pressing upper left button on base (6) pulls arm in. if left hand change to 11.
 			arm.set(ARMSPEED_UP);
-		else if(joystick.getRawButton(7)) // pressing lower left button on base (7) pushes arm out. if left hand change to 10.
+		else if(joystick.getRawButton(2)) // pressing lower left button on base (7) pushes arm out. if left hand change to 10.
 			arm.set(ARMSPEED_DOWN);
 		else							  // stops arm
 			arm.set(0);
 		
-		
 		//claw
-		if(joystick.getRawButton(8))
+
+		if(joystick.getRawButton(4)) {
 			claw.set(CLAWSPEED);
-		else
+		}else if(joystick.getRawButton(5)) {
+			claw.set(-CLAWSPEED);
+		}else {
 			claw.set(0);
-				
+		}
+		
+		//Climb
+		if(joystick.getRawButton(6)) {
+			Climb.set(1);
+		}else if(joystick.getTrigger()) {
+			Climb.set(-1);
+		}else {
+			Climb.set(0);
+		}
+		
 		//pushes all the new values to smart dashboard
 		UpdateLog();
-		
 	}
 
-	//during test
+	// during test
 	@Override
 	public void testPeriodic() {
-		//toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, MotorSpeed);
+		// toggleMotorPolarity(armLiftMotor, ArmClosedSwitch, MotorSpeed);
 	}
-	
+
 	public double jsDeadband(double js) {
 		js = Limit(js, -1.0, 1.0);
-		if(Math.abs(js) <= JOYDB) 
+		if (Math.abs(js) <= JOYDB)
 			return 0.0;
-		if(js > JOYDB)
+		if (js > JOYDB)
 			return (js - JOYDB) / (1.0 - JOYDB);
 		else
 			return (js + JOYDB) / (1.0 - JOYDB);
 	}
-	
-	
-	public double deadband(double input, double motorDeadband){
-		input = Limit(input, -1.0, 1.0); 
-		if(input == 0.0) 
+
+	public double deadband(double input, double motorDeadband) {
+		input = Limit(input, -1.0, 1.0);
+		if (input == 0.0)
 			return 0.0;
-		else if(input > 0)
+		else if (input > 0)
 			return (1 - motorDeadband) * input + motorDeadband;
 		else
 			return (1 - motorDeadband) * input - motorDeadband;
 	}
-	
-	//Limits a variable to to a given range
-	public double Limit(double value,double min,double max) { 
-		if(value > max)  return max;
-		if(value < min)  return min;
-						 return value;
+
+	// Limits a variable to to a given range
+	public double Limit(double value, double min, double max) {
+		if (value > max)
+			return max;
+		if (value < min)
+			return min;
+		return value;
 	}
-	
-	//DRIVE TRAIN STUFF
+
+	// DRIVE TRAIN STUFF
 	public void DriveWithController() {
-		driveTrain.tankDrive(deadband(jsDeadband(gamepad.getRawAxis(3)),DRIVEDB)*maxSpeedDrive,
-				deadband(jsDeadband(gamepad.getY()),DRIVEDB)*maxSpeedDrive);
+		driveTrain.tankDrive(deadband(jsDeadband(gamepad.getRawAxis(3)), DRIVEDB) * maxSpeedDrive,
+				deadband(jsDeadband(gamepad.getY()), DRIVEDB) * maxSpeedDrive);
 	}
-	
-	public void DriveStraight() {
-		double error = gyro.getAngle() - toggle.getAngle(); // set error to differance between robot angle and starting angle
-		// while toggled keep starting angle
-		driveTrain.arcadeDrive( 1, error*KP);
+
+	public void DriveStraightSigmoid(double speed) {
+		double error = gyro.getAngle() - toggle.getAngle(); // set error to differance between robot angle and starting
+															// angle
+		double GyroDriveAngle = -error * KP;
+		SmartDashboard.putNumber("GyroDriveAngle before Function", GyroDriveAngle);
+		GyroDriveAngle = Sigmoid(2 ,GyroDriveAngle);
+		SmartDashboard.putNumber("GyrDriveAngle after function", GyroDriveAngle);
+		driveTrain.arcadeDrive(speed, GyroDriveAngle);
 	}
-	
+
 	public void DriveStraight(double speed) {
 		double error = gyro.getAngle() - toggle.getAngle();
-		driveTrain.arcadeDrive(speed, error*KP);
+
+		// driveTrain.arcadeDrive(speed, -error*KP);
+		double GyroDriveAngle = -error * KP;
+		SmartDashboard.putNumber("GyroDriveAngle before Function", GyroDriveAngle);
+		GyroDriveAngle = Limit(GyroDriveAngle, -0.5, 0.5);
+		SmartDashboard.putNumber("GyrDriveAngle after function", GyroDriveAngle);
+		driveTrain.arcadeDrive(speed, GyroDriveAngle);
+	}
+
+	//// INTERNAL STUFF BELOW
+	//sigmoid function
+	public double Sigmoid(double k, double angle) {
+		return (1/Math.pow(2, -k * angle))-1;
 	}
 	
-	////INTERNAL STUFF BELOW
-
-	//inverts digital input boolean
+	
+	// inverts digital input boolean
 	public boolean returnBool(DigitalInput input) {
 		return !input.get();
 	}
-	
-	//smart dashboard outputs
+
+	// smart dashboard outputs
 	public void OutputBoolean(DigitalInput input, String name) {
 		SmartDashboard.putBoolean(name, returnBool(input));
 	}
-	
+
 	public void OutputNumber(int input, String name) {
 		SmartDashboard.putNumber(name, input);
 	}
-	
+
 	public void Log() {
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 		SmartDashboard.putNumber("Left Motor", leftSideMotor.get());
@@ -169,9 +204,9 @@ public class Robot extends TimedRobot implements Constants {
 		SmartDashboard.putNumber("Claw Motor", claw.get());
 		SmartDashboard.updateValues();
 	}
-	
+
 	public void UpdateLog() {
 		SmartDashboard.updateValues();
 	}
-	
+
 }

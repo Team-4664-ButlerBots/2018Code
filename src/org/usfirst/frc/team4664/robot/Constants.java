@@ -5,8 +5,9 @@ public interface Constants{
 	final int LSMOTOR	= 4; //Port for left side motor controller
     final int RSMOTOR	= 5; //Port for right side motor controller
     final int CAGEPORT 	= 0;
-    final int ARMPORT 	= 1;
-    final int CLAWPORT 	= 2; 
+    final int ARMPORT 	= 2;
+    final int CLAWPORT 	= 1; 
+    final int CLIMBPORT = 3;
 //Laptop Ports
     final int gamepadPort	= 1;
     final int joystickPort  = 0;
@@ -31,6 +32,7 @@ public interface Constants{
     final double TURNDB		= 0.2;
     final double CLAWDB 	= 0.3;
     
+    
 //Tunings, Gyro/Drive
-    final double KP = 0.03;
+    final double KP = 0.15;
 }
